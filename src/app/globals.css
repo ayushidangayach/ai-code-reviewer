@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Markdown Viewer Styles */
+.markdown-viewer {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.markdown-viewer h1,
+.markdown-viewer h2,
+.markdown-viewer h3,
+.markdown-viewer h4,
+.markdown-viewer h5,
+.markdown-viewer h6 {
+  @apply font-bold text-gray-900 dark:text-white;
+}
+
+.markdown-viewer h1 {
+  @apply text-3xl border-b border-gray-200 dark:border-gray-700 pb-2 mb-4;
+}
+
+.markdown-viewer h2 {
+  @apply text-2xl border-b border-gray-200 dark:border-gray-700 pb-2 mb-3 mt-6;
+}
+
+.markdown-viewer h3 {
+  @apply text-xl mb-2 mt-4;
+}
+
+.markdown-viewer h4 {
+  @apply text-lg mb-2 mt-3;
+}
+
+.markdown-viewer h5 {
+  @apply text-base mb-2 mt-2;
+}
+
+.markdown-viewer h6 {
+  @apply text-sm mb-2 mt-2;
+}
+
+.markdown-viewer p {
+  @apply text-gray-700 dark:text-gray-300 mb-4 leading-relaxed;
+}
+
+.markdown-viewer ul,
+.markdown-viewer ol {
+  @apply text-gray-700 dark:text-gray-300 mb-4 space-y-1;
+}
+
+.markdown-viewer ul {
+  @apply list-disc list-inside;
+}
+
+.markdown-viewer ol {
+  @apply list-decimal list-inside;
+}
+
+.markdown-viewer li {
+  @apply text-gray-700 dark:text-gray-300;
+}
+
+.markdown-viewer blockquote {
+  @apply border-l-4 border-blue-500 pl-4 italic text-gray-600 dark:text-gray-400 mb-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-r;
+}
+
+.markdown-viewer table {
+  @apply min-w-full border border-gray-300 dark:border-gray-600 rounded-lg mb-4;
+}
+
+.markdown-viewer thead {
+  @apply bg-gray-100 dark:bg-gray-700;
+}
+
+.markdown-viewer tbody {
+  @apply divide-y divide-gray-300 dark:divide-gray-600;
+}
+
+.markdown-viewer tr {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-800;
+}
+
+.markdown-viewer th {
+  @apply px-4 py-2 text-left font-semibold text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-600;
+}
+
+.markdown-viewer td {
+  @apply px-4 py-2 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-600;
+}
+
+.markdown-viewer a {
+  @apply text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline;
+}
+
+.markdown-viewer img {
+  @apply max-w-full h-auto rounded-lg shadow-md my-4;
+}
+
+.markdown-viewer hr {
+  @apply border-gray-300 dark:border-gray-600 my-6;
+}
+
+.markdown-viewer strong {
+  @apply font-bold text-gray-900 dark:text-white;
+}
+
+.markdown-viewer em {
+  @apply italic text-gray-700 dark:text-gray-300;
+}
+
+.markdown-viewer code {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+/* Syntax Highlighter Overrides */
+.markdown-viewer pre {
+  @apply bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto;
+}
+
+.markdown-viewer pre code {
+  @apply bg-transparent text-inherit p-0;
+}
+
+/* Math Rendering */
+.markdown-viewer .math {
+  @apply text-center my-4;
+}
+
+.markdown-viewer .math-inline {
+  @apply inline;
+}
+
+/* Task Lists */
+.markdown-viewer input[type="checkbox"] {
+  @apply mr-2;
+}
+
+/* Code Blocks */
+.markdown-viewer .hljs {
+  @apply bg-transparent;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .markdown-viewer {
+    @apply text-sm;
+  }
+  
+  .markdown-viewer h1 {
+    @apply text-2xl;
+  }
+  
+  .markdown-viewer h2 {
+    @apply text-xl;
+  }
+  
+  .markdown-viewer h3 {
+    @apply text-lg;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .markdown-viewer {
+    @apply text-black;
+  }
+  
+  .markdown-viewer pre {
+    @apply bg-gray-100 text-black border;
+  }
+}

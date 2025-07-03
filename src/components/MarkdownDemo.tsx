@@ -1,0 +1,18 @@
+import React from "react";
+import MarkdownViewer from "./MarkdownViewer";
+
+const MarkdownDemo: React.FC = () => {
+  const demoContent =
+    "The provided diff shows modifications to a `Button` component in a React application. Here are some observations, suggestions for improvements, and potential issues:\n\n### Improvements and Suggestions\n\n1. **TypeScript Type Safety**:\n   - The `onClick` prop is currently typed as `() => void`. If the button can be disabled, it might be useful to allow for the `onClick` function to be `undefined` when the button is disabled. Consider changing the type to `(() => void) | undefined` to clarify that the function may not be available.\n\n2. **Default Props**:\n   - The default values for `variant` and `disabled` are set in the function parameters. This is a good practice, but ensure that the component is consistently using these defaults throughout its lifecycle.\n\n3. **Button Accessibility**:\n   - The button should have an `aria-disabled` attribute when it is disabled. This helps screen readers understand that the button is not interactive:\n     ```jsx\n     aria-disabled={disabled}\n     ```\n\n4. **Class Name Concatenation**:\n   - The class name concatenation is done using template literals, which is fine. However, consider using a utility library like `classnames` for better readability and maintainability. This can help avoid potential mistakes with conditional classes:\n     ```javascript\n     import classNames from 'classnames';\n\n     className={classNames('px-4 py-2 rounded', {\n       'bg-blue-500 text-white hover:bg-blue-600': variant === 'primary',\n       'bg-gray-500 text-white hover:bg-gray-600': variant === 'secondary',\n       'opacity-50 cursor-not-allowed': disabled,\n     })}\n     ```\n\n5. **Testing**:\n   - Ensure that there are corresponding tests for the new functionality, especially for the `disabled` state and the different `variant` props. If tests are not included in this PR, consider adding them to ensure the component behaves as expected.\n\n6. **Documentation**:\n   - If this component is part of a larger library or shared codebase, consider adding comments or documentation regarding the new props (`variant` and `disabled`). This will help other developers understand how to use the component effectively.\n\n### Potential Bugs or Issues\n\n1. **Click Event Handling**:\n   - If the button is disabled, the `onClick` handler should not be called. Ensure that the `onClick` function is conditionally executed only when the button is not disabled. You can handle this by modifying the click handler:\n     ```jsx\n     onClick={!disabled ? onClick : undefined}\n     ```\n\n2. **Styling Consistency**:\n   - Ensure that the styles applied for the `disabled` state (like `opacity-50` and `cursor-not-allowed`) are consistent with the design system of your application. Check if these styles are adequate for indicating a disabled state.\n\n3. **Testing Edge Cases**:\n   - Consider edge cases for the `variant` prop. For example, what happens if an invalid variant is passed? You might want to handle such cases either by using TypeScript's union types more strictly or by providing a fallback.\n\n### Summary\n\nOverall, the changes made in the PR are a good enhancement to the `Button` component, adding flexibility with the `variant` and `disabled` props. By addressing the suggestions above, you can improve the component's usability, accessibility, and maintainability.";
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold text-center mb-8">
+        Markdown Viewer Demo
+      </h1>
+      <MarkdownViewer content={demoContent} />
+    </div>
+  );
+};
+
+export default MarkdownDemo;
