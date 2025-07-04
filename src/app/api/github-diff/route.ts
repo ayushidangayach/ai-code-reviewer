@@ -1,12 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// CORS helper
+function withCORS(response: NextResponse) {
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type");
+  return response;
+}
+
+// Handle OPTIONS preflight
+export async function OPTIONS() {
+  return withCORS(new NextResponse(null, { status: 204 }));
+}
+
 export async function GET(request: NextRequest) {
   const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
   if (!GITHUB_TOKEN) {
-    return NextResponse.json(
-      { error: "GitHub token not configured" },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json(
+        { error: "GitHub token not configured" },
+        { status: 500 }
+      )
     );
   }
 
@@ -14,18 +29,18 @@ export async function GET(request: NextRequest) {
   const prUrl = searchParams.get("url");
 
   if (!prUrl) {
-    return NextResponse.json({ error: "Missing PR URL" }, { status: 400 });
+    return withCORS(
+      NextResponse.json({ error: "Missing PR URL" }, { status: 400 })
+    );
   }
 
-  // Extract owner, repo, and pull number from the URL
   const match = prUrl.match(
     /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)/
   );
 
   if (!match) {
-    return NextResponse.json(
-      { error: "Invalid GitHub PR URL" },
-      { status: 400 }
+    return withCORS(
+      NextResponse.json({ error: "Invalid GitHub PR URL" }, { status: 400 })
     );
   }
 
@@ -41,19 +56,20 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch diff from GitHub" },
-        { status: response.status }
+      return withCORS(
+        NextResponse.json(
+          { error: "Failed to fetch diff from GitHub" },
+          { status: response.status }
+        )
       );
     }
 
     const diff = await response.text();
-    return NextResponse.json({ diff });
+    return withCORS(NextResponse.json({ diff }));
   } catch (error) {
     console.error("GitHub Diff API Error:", error);
-    return NextResponse.json(
-      { error: "Error fetching PR diff" },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: "Error fetching PR diff" }, { status: 500 })
     );
   }
 }
