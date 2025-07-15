@@ -2,7 +2,6 @@
   "name": "ai-code-reviewer-extension-vanilla",
   "version": "1.0.0",
   "description": "Chrome extension for AI code review with vanilla JavaScript",
-  "main": "popup.js",
   "scripts": {
     "build": "sh build.sh",
     "dev": "vite build --watch",
