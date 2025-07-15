@@ -4,7 +4,7 @@
   "description": "Chrome extension for AI code review with React MarkdownViewer",
   "main": "popup.js",
   "scripts": {
-    "build": "vite build",
+    "build": "sh build.sh",
     "dev": "vite build --watch",
     "preview": "vite preview"
   },
@@ -31,6 +31,7 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^4.1.11",
     "typescript": "^5",
-    "vite": "^7.0.1"
+    "vite": "^7.0.1",
+    "vite-plugin-static-copy": "^3.1.0"
   }
 }

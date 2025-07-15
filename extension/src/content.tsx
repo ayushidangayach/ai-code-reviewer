@@ -1,15 +1,35 @@
-/// <reference types="chrome" />
-import React, { useState } from "react";
-import { createRoot } from "react-dom/client";
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom/client";
 import MarkdownViewer from "./components/MarkdownViewer";
 
-// Modal component for content script
-const ReviewModal: React.FC<{
+// Inject required CSS for KaTeX and highlight.js at runtime
+function injectContentStyles() {
+  const cssLinks = [
+    "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css",
+    "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css",
+  ];
+  cssLinks.forEach((href) => {
+    if (!document.querySelector(`link[href='${href}']`)) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.type = "text/css";
+      link.href = href;
+      document.head.appendChild(link);
+    }
+  });
+}
+
+const Modal = ({
+  isOpen,
+  onClose,
+  review,
+  loading,
+}: {
   isOpen: boolean;
   onClose: () => void;
   review: string;
   loading: boolean;
-}> = ({ isOpen, onClose, review, loading }) => {
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -40,6 +60,7 @@ const ReviewModal: React.FC<{
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div
           style={{
             display: "flex",
@@ -52,7 +73,7 @@ const ReviewModal: React.FC<{
             style={{
               margin: 0,
               fontSize: "18px",
-              fontWeight: "600",
+              fontWeight: 600,
               color: "#1f2937",
             }}
           >
@@ -67,13 +88,14 @@ const ReviewModal: React.FC<{
               padding: "8px 16px",
               borderRadius: "6px",
               cursor: "pointer",
-              fontWeight: "500",
+              fontWeight: 500,
             }}
           >
             Close
           </button>
         </div>
 
+        {/* Loader */}
         {loading && (
           <div
             style={{
@@ -94,65 +116,62 @@ const ReviewModal: React.FC<{
                 animation: "spin 1s linear infinite",
                 marginRight: "8px",
               }}
-            ></div>
+            />
             <span>Loading review...</span>
           </div>
         )}
 
+        {/* Markdown Output */}
         {review && (
           <div style={{ maxHeight: "60vh", overflow: "auto" }}>
             <MarkdownViewer content={review} />
           </div>
         )}
 
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+        {/* CSS animation */}
+        <style>
+          {`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}
+        </style>
       </div>
     </div>
   );
 };
 
-// Main content script component
-const ContentScript: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const ReviewPopup = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const [review, setReview] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleReview = async () => {
-    const prUrl = window.location.href;
-    setIsModalOpen(true);
+  const runReview = async () => {
+    const url = window.location.href;
+
+    setIsOpen(true);
     setLoading(true);
     setReview("");
 
     try {
-      // Fetch diff
-      const diffRes = await fetch(
-        `http://localhost:3000/api/github-diff?url=${encodeURIComponent(prUrl)}`
+      const res1 = await fetch(
+        `http://localhost:3000/api/github-diff?url=${encodeURIComponent(url)}`
       );
-      const diffData = await diffRes.json();
+      const json1 = await res1.json();
 
-      if (!diffRes.ok || !diffData.diff) {
-        throw new Error("Failed to fetch diff");
-      }
+      if (!res1.ok || !json1.diff) throw new Error("Failed to fetch diff");
 
-      // Get AI review
-      const reviewRes = await fetch(`http://localhost:3000/api/review`, {
+      const res2 = await fetch("http://localhost:3000/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ diff: diffData.diff }),
+        body: JSON.stringify({ diff: json1.diff }),
       });
 
-      const reviewData = await reviewRes.json();
+      const json2 = await res2.json();
+      if (!res2.ok || !json2.review) throw new Error("Failed to get review");
 
-      if (!reviewRes.ok || !reviewData.review) {
-        throw new Error("Failed to get review");
-      }
-
-      setReview(reviewData.review);
+      setReview(json2.review);
     } catch (err) {
       setReview(
         `❌ Error: ${err instanceof Error ? err.message : "An error occurred"}`
@@ -162,27 +181,26 @@ const ContentScript: React.FC = () => {
     }
   };
 
-  // Start review when component mounts
-  React.useEffect(() => {
-    handleReview();
+  useEffect(() => {
+    injectContentStyles();
+    runReview();
   }, []);
 
   return (
-    <ReviewModal
-      isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
+    <Modal
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
       review={review}
       loading={loading}
     />
   );
 };
 
-// Inject button into GitHub PR page
-function injectButton() {
+const injectReviewButton = () => {
   if (document.getElementById("ai-review-button")) return;
 
-  const target = document.querySelector("div.gh-header-actions");
-  if (!target) return;
+  const actionsBar = document.querySelector("div.gh-header-actions");
+  if (!actionsBar) return;
 
   const button = document.createElement("button");
   button.id = "ai-review-button";
@@ -200,37 +218,19 @@ function injectButton() {
   `;
 
   button.onclick = () => {
-    // Create modal container and render React component
-    const modalContainer = document.createElement("div");
-    modalContainer.id = "ai-review-modal-container";
-    document.body.appendChild(modalContainer);
-
-    const root = createRoot(modalContainer);
-    root.render(<ContentScript />);
+    const container = document.createElement("div");
+    container.id = "ai-review-modal-container";
+    document.body.appendChild(container);
+    ReactDOM.createRoot(container).render(<ReviewPopup />);
   };
 
-  target.appendChild(button);
-}
+  actionsBar.appendChild(button);
+};
 
-function injectStyle(href: string) {
-  if (document.querySelector(`link[href="${href}"]`)) return;
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.type = "text/css";
-  link.href = chrome.runtime.getURL(href);
-  document.head.appendChild(link);
-}
-
-// Inject all needed CSS
-injectStyle("assets/MarkdownViewer-*.css"); // Use the actual filename from your build
-injectStyle("assets/KaTeX_*.css"); // For KaTeX
-injectStyle("assets/highlight*.css"); // For highlight.js
-
-// Initialize when DOM is ready
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(injectButton, 1500);
-  });
+  document.addEventListener("DOMContentLoaded", () =>
+    setTimeout(injectReviewButton, 1500)
+  );
 } else {
-  setTimeout(injectButton, 1500);
+  setTimeout(injectReviewButton, 1500);
 }
