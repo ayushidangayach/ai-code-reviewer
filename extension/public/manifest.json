@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "AI Code Reviewer",
+  "version": "1.0",
+  "permissions": ["scripting", "storage", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
