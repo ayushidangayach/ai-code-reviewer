@@ -16,5 +16,6 @@
     "isolatedModules": true,
     "jsx": "preserve"
   },
-  "include": ["src", "types"]
+  "include": ["src", "types"],
+  "types": ["chrome"]
 } 
