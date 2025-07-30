@@ -215,8 +215,22 @@ class ReviewPopup {
     this.modal.setLoading(true);
 
     try {
+      // Get the GitHub token from chrome storage
+      const result = await new Promise<{ githubToken?: string }>((resolve) => {
+        chrome.storage.sync.get(["githubToken"], resolve);
+      });
+      const githubToken = result.githubToken;
+
+      if (!githubToken) {
+        throw new Error(
+          "GitHub token not found. Please set it in the extension popup."
+        );
+      }
+
       const res1 = await fetch(
-        `${BASE_URL}api/github-diff?url=${encodeURIComponent(url)}`
+        `${BASE_URL}api/github-diff?url=${encodeURIComponent(
+          url
+        )}&token=${encodeURIComponent(githubToken)}`
       );
       const json1 = await res1.json();
 

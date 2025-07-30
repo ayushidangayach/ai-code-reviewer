@@ -14,23 +14,19 @@ export async function OPTIONS() {
 }
 
 export async function GET(request: NextRequest) {
-  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-
-  if (!GITHUB_TOKEN) {
-    return withCORS(
-      NextResponse.json(
-        { error: "GitHub token not configured" },
-        { status: 500 }
-      )
-    );
-  }
-
   const { searchParams } = new URL(request.url);
   const prUrl = searchParams.get("url");
+  const token = searchParams.get("token");
 
   if (!prUrl) {
     return withCORS(
       NextResponse.json({ error: "Missing PR URL" }, { status: 400 })
+    );
+  }
+
+  if (!token) {
+    return withCORS(
+      NextResponse.json({ error: "Missing GitHub token" }, { status: 400 })
     );
   }
 
@@ -50,7 +46,7 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(diffUrl, {
       headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
+        Authorization: `token ${token}`,
         Accept: "application/vnd.github.v3.diff",
       },
     });
